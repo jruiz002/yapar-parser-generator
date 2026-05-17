@@ -31,7 +31,7 @@ yapar-parser-generator/
 │
 ├── visualizer/                    # Módulo 5 – Visualizador
 │   ├── __init__.py
-│   └── automaton_renderer.py      #   PNG (pydot) + HTML interactivo (vis.js)
+│   └── automaton_renderer.py      #   PNG (pydot)
 │
 ├── evaluator/                     # Módulo 6 – Evaluador de cadenas
 │   ├── __init__.py
@@ -44,7 +44,6 @@ yapar-parser-generator/
 │
 └── output/                        # Salidas generadas (creado automáticamente)
     ├── lr0_automaton.png
-    ├── lr0_automaton.html
     └── parse_results.txt
 ```
 
@@ -70,30 +69,33 @@ sudo apt-get install graphviz
 
 ## Uso
 
-### Modo básico (standalone, sin YALex)
+El sistema funciona de 3 maneras distintas dependiendo de cómo quieras integrar el lexer de YALex.
 
+### Modo A: Integración Automática (Recomendado)
+YAPar invocará automáticamente tu proyecto anterior para generar el lexer al vuelo y evaluará las cadenas:
 ```bash
-python main.py examples/arithmetic.yalp \
+python3 main.py examples/arithmetic.yalp \
+    -l ../lexical-analyzer-and-parser/mi_lexer.yal \
     -i examples/cadenas_aritmetica.txt \
-    -o output/ \
-    --html
+    -o output/
 ```
 
-### Con integración YALex
-
+### Modo B: Integración Manual
+Si ya generaste el archivo `.py` de tu lexer previamente en YALex, se lo pasas directamente a YAPar:
 ```bash
-# Paso 1: generar el lexer con YALex
-cd ../lexical-analyzer-and-parser
-python main.py mi_lexer.yal -o ../yapar-parser-generator/output/thelexer.py
-
-# Paso 2: ejecutar YAPar con el lexer generado
-cd ../yapar-parser-generator
-python main.py mi_gramatica.yalp \
-    -l mi_lexer.yal \
+# Ejecutar YAPar con el lexer ya generado
+python3 main.py examples/arithmetic.yalp \
     --lexer-py output/thelexer.py \
-    -i cadenas.txt \
-    -o output/ \
-    --html
+    -i examples/cadenas_aritmetica.txt \
+    -o output/
+```
+
+### Modo C: Básico (Standalone)
+Si no cuentas con YALex, puedes probar la gramática dando las cadenas ya separadas por espacios con los nombres de sus tokens (ej: `ID PLUS ID`):
+```bash
+python3 main.py examples/arithmetic.yalp \
+    -i examples/cadenas_aritmetica.txt \
+    -o output/
 ```
 
 ### Argumentos
@@ -105,7 +107,7 @@ python main.py mi_gramatica.yalp \
 | `--lexer-py` | Lexer `.py` generado por YALex (activa integración real) |
 | `-i` / `--input` | Archivo con cadenas a evaluar |
 | `-o` / `--output` | Directorio de salida (default: `output/`) |
-| `--html` | Genera visualización HTML interactiva |
+
 | `--no-png` | Omite la generación del PNG |
 | `--entrypoint` | Nombre del método tokenizador del lexer (default: `token`) |
 
@@ -124,7 +126,7 @@ El sistema requiere de 3 archivos principales para funcionar en conjunto:
 1. **La Tabla y los Cálculos en la Consola**: Imprime los conjuntos FIRST, FOLLOW y dibuja la matriz de la Tabla SLR(1) (con acciones de shift/reduce).
 2. **La Traza Paso a Paso**: Imprime cómo la pila va evaluando cada cadena ingresada.
 3. **El Reporte de Resultados (`output/parse_results.txt`)**: Archivo de texto limpio indicando únicamente si la cadena fue `ACCEPTED ✓` o detalla el `SYNTAX ERROR ✗`.
-4. **El Autómata Visual (`output/lr0_automaton.html` y `.png`)**: Un grafo interactivo (web) y estático (imagen) donde cada nodo es un estado con sus ítems LR(0) y las transiciones etiquetadas.
+4. **El Autómata Visual (`output/lr0_automaton.png`)**: Un grafo estático (imagen) donde cada nodo es un estado con sus ítems LR(0) y las transiciones etiquetadas.
 
 ---
 
@@ -159,7 +161,7 @@ El proyecto está organizado en 6 módulos secuenciales que interactúan de la s
 
 ### Módulo 5 — Visualizador del autómata
 - **Recibe**: Autómata LR(0) del Módulo 3.
-- **Produce**: Representación visual (`HTML` interactivo y `PNG`) mostrando estados como nodos y transiciones como aristas etiquetadas.
+- **Produce**: Representación visual (`PNG`) mostrando estados como nodos y transiciones como aristas etiquetadas.
 - **Herramienta**: Graphviz (`pydot`). Cada nodo lista sus ítems LR(0) internamente.
 
 ### Módulo 6 — Evaluador de cadenas

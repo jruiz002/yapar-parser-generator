@@ -9,7 +9,6 @@ Argumentos:
   -l / --lexer      Archivo .yal de YALex (opcional, activa integración léxica)
   -i / --input      Archivo con cadenas a evaluar (una por línea)
   -o / --output     Directorio de salida (default: output/)
-  --html            Genera visualización HTML interactiva (además del PNG)
   --no-png          Omite la generación del PNG (útil si graphviz no está instalado)
   --lexer-py        Ruta al lexer .py ya generado (omite ejecutar yalex)
   --entrypoint      Nombre del entrypoint del lexer (default: 'token')
@@ -23,7 +22,7 @@ from parsing.yalp_parser import parse_yalp
 from grammar.lr0_builder import build_lr0_automaton
 from grammar.first_follow import compute_first, compute_follow
 from slr.slr_table import build_slr_table
-from visualizer.automaton_renderer import render_automaton_png, render_automaton_html
+from visualizer.automaton_renderer import render_automaton_png
 from evaluator.string_evaluator import StringEvaluator, print_parse_trace
 from yalex_adapter import invoke_yalex, load_generated_lexer, tokenize_with_lexer, tokenize_simple
 
@@ -53,7 +52,6 @@ def main():
     parser.add_argument("-l", "--lexer", help="Archivo .yal de YALex (opcional)")
     parser.add_argument("-i", "--input", help="Archivo con cadenas a evaluar")
     parser.add_argument("-o", "--output", default="output", help="Directorio de salida")
-    parser.add_argument("--html", action="store_true", help="Generar HTML interactivo")
     parser.add_argument("--no-png", action="store_true", help="Omitir generación PNG")
     parser.add_argument("--lexer-py", help="Ruta al lexer .py ya generado por YALex")
     parser.add_argument("--entrypoint", default="token", help="Entrypoint del lexer")
@@ -148,15 +146,7 @@ def main():
         else:
             print("  ✗ PNG no generado (instala pydot y graphviz).")
 
-    if args.html:
-        html_path = os.path.join(args.output, "lr0_automaton.html")
-        render_automaton_html(automaton, html_path)
-        print(f"  ✓ HTML interactivo generado: {html_path}")
-    else:
-        # Siempre generar el HTML aunque no se pida --html
-        html_path = os.path.join(args.output, "lr0_automaton.html")
-        render_automaton_html(automaton, html_path)
-        print(f"  ✓ HTML interactivo generado: {html_path}")
+
 
     # ── FASE 6: Evaluador de cadenas ──────────────────────────────────────
     if not args.input:
